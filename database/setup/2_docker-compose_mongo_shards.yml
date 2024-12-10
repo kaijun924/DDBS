@@ -1,0 +1,71 @@
+services:
+  # DBMS1 Replica Set (Shard1)
+  dbms1_a:
+    container_name: dbms1_a
+    image: mongo
+    command: mongod --shardsvr --replSet dbms1_rs --port 27017
+    volumes:
+      - ./2_dbms1.js:/setup.js
+      - dbms1_a:/data/db
+    networks:
+      - mongo_cluster_net
+  dbms1_b:
+    container_name: dbms1_b
+    image: mongo
+    command: mongod --shardsvr --replSet dbms1_rs --port 27017
+    volumes:
+      - ./2_dbms1.js:/setup.js
+      - dbms1_b:/data/db
+    networks:
+      - mongo_cluster_net
+
+  # DBMS2 Replica Set (Shard2)
+  dbms2_a:
+    container_name: dbms2_a
+    image: mongo
+    command: mongod --shardsvr --replSet dbms2_rs --port 27017
+    volumes:
+      - ./2_dbms2.js:/setup.js
+      - dbms2_a:/data/db
+    networks:
+      - mongo_cluster_net
+  dbms2_b:
+    container_name: dbms2_b
+    image: mongo
+    command: mongod --shardsvr --replSet dbms2_rs --port 27017
+    volumes:
+      - ./2_dbms2.js:/setup.js
+      - dbms2_b:/data/db
+    networks:
+      - mongo_cluster_net
+
+  # DBMSX Replica Set (ShardX)
+  # dbmsX_a:
+  #   container_name: dbmsX_a
+  #   image: mongo
+  #   command: mongod --shardsvr --replSet dbmsX_rs --port 27017
+  #   volumes:
+  #     - ./2_dbmsX.js:/setup.js
+  #     - dbmsX_a:/data/db
+  #   networks:
+  #     - mongo_cluster_net
+  # dbmsX_b:
+  #   container_name: dbmsX_b
+  #   image: mongo
+  #   command: mongod --shardsvr --replSet dbmsX_rs --port 27017
+  #   volumes:
+  #     - ./2_dbmsX.js:/setup.js
+  #     - dbmsX_b:/data/db
+  #   networks:
+  #     - mongo_cluster_net
+      
+volumes:
+  dbms1_a: {}
+  dbms1_b: {}
+  dbms2_a: {}
+  dbms2_b: {}
+  dbmsX_a: {}
+  dbmsX_b: {}
+networks:
+  mongo_cluster_net:
+    external: true

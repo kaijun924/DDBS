@@ -1,9 +1,0 @@
-version: '1.0'
-
-services:
-  mongos:
-    container_name: router
-    image: mongo
-    command: mongos --configdb cfgrs/172.26.46.90:40001,172.26.46.90:40002 --bind_ip 0.0.0.0 --port 27017
-    ports:
-      - 60000:27017

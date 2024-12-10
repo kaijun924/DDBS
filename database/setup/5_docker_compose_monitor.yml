@@ -1,0 +1,39 @@
+
+services:
+  mongodb_exporter:
+    image: bitnami/mongodb-exporter:latest
+    container_name: mongodb_exporter
+    environment:
+      - MONGODB_URI=router:27017  # Point to the MongoS router
+    networks:
+      - mongo_cluster_net
+    ports:
+      - "9216:9216"  # Default port for MongoDB exporter metrics
+    restart: always
+
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    volumes:
+      - ./5_prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - mongo_cluster_net
+    ports:
+      - "9090:9090"
+    restart: always
+
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    networks:
+      - mongo_cluster_net
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    restart: always
+
+networks:
+  mongo_cluster_net:
+    external: true
