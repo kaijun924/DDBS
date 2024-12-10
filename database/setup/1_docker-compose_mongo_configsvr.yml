@@ -1,0 +1,39 @@
+services:
+  configsvr_a:
+    container_name: configsvr_a
+    image: mongo
+    command: mongod --configsvr --replSet cfgrs --port 27017
+    # ports:
+    #   - 40001:27017
+    volumes:
+      - ./1_configsvr.js:/setup.js
+      - configsvr_a:/data/db
+    networks:
+      - mongo_cluster_net
+  configsvr_b:
+    container_name: configsvr_b
+    image: mongo
+    command: mongod --configsvr --replSet cfgrs --port 27017
+    # ports:
+    #   - 40002:27017
+    volumes:
+      - configsvr_b:/data/db
+    networks:
+      - mongo_cluster_net
+  configsvr_c:
+    container_name: configsvr_c
+    image: mongo
+    command: mongod --configsvr --replSet cfgrs --port 27017
+    # ports:
+    #   - 40003:27017
+    volumes:
+      - configsvr_c:/data/db
+    networks:
+      - mongo_cluster_net
+volumes:
+  configsvr_a: {}
+  configsvr_b: {}
+  configsvr_c: {}
+networks:
+  mongo_cluster_net:
+    external: true

@@ -1,0 +1,14 @@
+services:
+  mongos:
+    container_name: router
+    image: mongo
+    command: mongos --configdb cfgrs/configsvr_a:27017,configsvr_b:27017,configsvr_c:27017 --bind_ip 0.0.0.0 --port 27017
+    ports:
+      - 60000:27017
+    volumes:
+      - ./3_router_fragments.js:/setup.js
+    networks:
+      - mongo_cluster_net
+networks:
+  mongo_cluster_net:
+    external: true
