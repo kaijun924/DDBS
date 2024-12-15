@@ -16,7 +16,7 @@ shareNum = len(share_uid_list)
 shareUidList = share_uid_list (for sharerNot: 1)
 """
 #所以需要article,read
-from handler import ReadTableHandler
+# from handler import ReadTableHandler
 import time
 import pandas as pd
 
@@ -24,16 +24,17 @@ class BeReadTools:
     """"
     initialize, make sure the read and article table is ready
     """
-    def __init__(self, db_handler: MongoDBHandler):
-        self.readTableHandler = ReadTableHandler(db_handler)
+    def __init__(self):
+        pass
+        # self.readTableHandler = ReadTableHandler(db_handler)
 
     """
     用 article 方式来迭代,给一个aid,返回一个beRead的list
     """
-    def _get_beRead_by_aid(self, article):
+    def _get_beRead_by_aid(self, article, readTableHandler):
         #全部改成get, 可能会有问题
         aid = article.get("aid")
-        read = self.readTableHandler.fetch_reads({"aid": aid})
+        read = readTableHandler.fetch_reads_to_beread({"aid": aid})
         beRead_entity = {}
 
         beRead_entity["id"] = "br" + aid
@@ -41,7 +42,6 @@ class BeReadTools:
         beRead_entity["aid"] = aid
         beRead_entity["readNum"] = str(len(read))
         beRead_entity["readUidList"] = [r["uid"] for r in read]
-
         commentUidList = [r["uid"] for r in read if r["commentOrNot"] == "1"]
         beRead_entity["commentNum"] = str(len(commentUidList))
         beRead_entity["commentUidList"] = commentUidList

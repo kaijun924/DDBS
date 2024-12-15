@@ -87,6 +87,20 @@ class ReadTableHandler(TableHandler):
             reads = self.collection.find(conditions, fields).skip(offset).limit(count)
         return list(reads)
     
+    def fetch_reads_to_beread(self, conditions={}, count=100, offset=0):
+        ### time check, when feaching beijing user's reads. 
+        ### implementation: read with added region field, which is the shard key
+        fields = {
+                    "_id": 0,
+                    "timestamp": 0,
+                    "region": 0
+                }
+        if count == None:
+            reads = self.collection.find(conditions, fields)
+        else:
+            reads = self.collection.find(conditions, fields).skip(offset).limit(count)
+        return list(reads)
+    
     def fetch_read_for_popular_rank(self, conditions={}, count=100, offset=0):
         #需要id,aid,timestamp
         fields = {
@@ -161,13 +175,14 @@ class BeReadTableHandler(TableHandler):
     def __init__(self, db_handler: MongoDBHandler):
         super().__init__(db_handler.be_read_collection)
         # self.userTableHandler = UserTableHandler(db_handler)
-        self.tools = BeReadTools(db_handler)
+        self.readTableHandler = ReadTableHandler(db_handler)
+        self.tools = BeReadTools()
     
     def _process_record(self, record):
-        return self.tools._get_beRead_by_aid(record)
+        return self.tools._get_beRead_by_aid(record,self.readTableHandler)
     
     def insert_new(self, record):
-        record = self.tools._get_beRead_by_aid(record)
+        record = self.tools._get_beRead_by_aid(record,self.readTableHandler)
         self.collection.insert_many(record) #
     
     ##或许可以重写bulk_insert
@@ -205,12 +220,16 @@ class PopularRankTableHandler(TableHandler):
 
     def bulk_insert(self, batch_size = 5000):
         #获取read表的所有数据
-        reads = self.readTableHandler.fetch_reads({}, None, None)
+        reads = self.readTableHandler.fetch_read_for_popular_rank({}, None, None)
 
         time_reads = {'daily': {}, 'weekly': {}, 'monthly': {}}
+        count = 0
         for read in reads:
             aid = read['aid']
             t = ReadTime(read['timestamp'])
+            count += 1
+            if count % 5000 == 0:
+                print(f"Processing {count} records.")
             for temporalGranularity in time_reads.keys():
                 tg = temporalGranularity
 
@@ -235,11 +254,11 @@ class PopularRankTableHandler(TableHandler):
                 popularRank_entity["id"] = popid
 
                 if tg == "daily":
-                    popularRank_entity["timestamp"] = DateToTimestamp(timeof, "daily")
+                    popularRank_entity["timestamp"] = DateToTimestamp.day_tmp(timeof)
                 elif tg == "weekly":
-                    popularRank_entity["timestamp"] = DateToTimestamp(timeof, "weekly")
+                    popularRank_entity["timestamp"] = DateToTimestamp.week_tmp(timeof)
                 elif tg == "monthly":
-                    popularRank_entity["timestamp"] = DateToTimestamp(timeof, "monthly")
+                    popularRank_entity["timestamp"] = DateToTimestamp.month_tmp(timeof)
 
                 popularRank_entity["temporalGranularity"] = tg
                 popularRank_entity["articleAidList"] = [aid for aid, _ in time_reads[tg][timeof]]
@@ -249,6 +268,28 @@ class PopularRankTableHandler(TableHandler):
                 popid += 1
             
         self.collection.insert_many(buffer)
+
+    def fetch_popularRanks(self, conditions={}, count=100, offset=0):
+        pipeline = [
+            {
+                "$match": conditions
+            },
+            {
+                "$group": {
+                    "_id": "$temporalGranularity",  # Group by the unique identifier
+                    "deduplicatedDoc": { "$first": "$$ROOT" }
+                }
+            },
+            {
+                "$replaceRoot": { "newRoot": "$deduplicatedDoc" }
+            }
+        ]
+        if count != None:
+            pipeline.append({"$skip": offset})
+            pipeline.append({"$limit": count})
+
+        popularRanks = self.collection.aggregate(pipeline)
+        return list(popularRanks)
 
 
     

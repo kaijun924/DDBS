@@ -72,6 +72,10 @@ class TableHandler:
                 records = self._process_record(record)
                 buffer.extend(records)
                 count += 1
+                # if count % 100 == 0:
+                #     self._write_to_db(buffer)
+                #     buffer = []
+                #     break
                 # Bulk write when buffer reaches batch_size
                 if len(buffer) >= batch_size:
                     self._write_to_db(buffer)
