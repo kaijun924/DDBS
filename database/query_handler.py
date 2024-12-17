@@ -1,6 +1,7 @@
 from base_handler import MongoDBHandler
 from handler import UserTableHandler, ArticleTableHandler, ReadTableHandler, BeReadTableHandler, PopularRankTableHandler
 from redis_handler import RedisHandler
+from hadoop import Hadoop_handler
 
 class QueryHandeler():
     def __init__(self, db_handler: MongoDBHandler):
@@ -10,6 +11,7 @@ class QueryHandeler():
         self.beReadTableHandler = BeReadTableHandler(db_handler)
         self.popularRankTableHandler = PopularRankTableHandler(db_handler)
         self.redisHandler = RedisHandler()
+        self.hadoop = Hadoop_handler()
         
     def fetch_users(self, conditions={}, count=100, offset=0):
         return self.userTableHandler.fetch_users(conditions, count, offset)
@@ -89,4 +91,7 @@ class QueryHandeler():
             result_from_mongo = self.popularRankTableHandler.fetch_popularRanks({"id": id})
             self.redisHandler.set(str(id), 'popularRank', result_from_mongo)
             return result_from_mongo
+        
+    def fetch_article_content_by_id(self, id: int):
+        return self.hadoop.read_file(id)
         
