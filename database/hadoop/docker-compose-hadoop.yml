@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  namenode:
+    image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
+    container_name: namenode
+    hostname: namenode
+    ports:
+      - "9870:9870"  # Web UI 访问
+      - "8020:8020"  # RPC 访问
+    volumes:
+      - namenode_data:/hadoop/dfs/name
+      - ../db-generation/articles:/articles
+      - ./hello.sh:/hello.sh
+    environment:
+      - CLUSTER_NAME=hadoop-cluster
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+      - HDFS_CONF_dfs_replication=1
+      - HDFS_LOGLEVEL=WARN
+      - HDFS_CONF_dfs_namenode_handler_count=50
+    deploy:
+      resources:
+        limits:
+          cpus: '4'  # 设置CPU限制为4核
+        reservations:
+          cpus: '2'  # 设置CPU保留为2核
+    networks:
+      - hadoop
+
+  datanode:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode
+    hostname: datanode
+    volumes:
+      - datanode_data:/hadoop/dfs/data
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+      - HDFS_CONF_dfs_datanode_handler_count=30
+      - HDFS_LOGLEVEL=WARN
+    depends_on:
+      - namenode
+    networks:
+      - hadoop
+
+  datanode2:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode2
+    hostname: datanode2
+    volumes:
+      - datanode_data2:/hadoop/dfs/data
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+      - HDFS_CONF_dfs_datanode_handler_count=30
+      - HDFS_LOGLEVEL=WARN
+    depends_on:
+      - namenode
+    networks:
+      - hadoop
+  datanode3:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode3
+    hostname: datanode3
+    volumes:
+      - datanode_data3:/hadoop/dfs/data
+    environment:
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
+      - HDFS_CONF_dfs_datanode_handler_count=30
+      - HDFS_LOGLEVEL=WARN
+    depends_on:
+      - namenode
+    networks:
+      - hadoop
+  resourcemanager:
+    image: bde2020/hadoop-resourcemanager:2.0.0-hadoop3.2.1-java8
+    container_name: resourcemanager
+    environment:
+      - SERVICE_PRECONDITION=namenode:9870 datanode:9864 datanode2:9864 datanode3:9864
+      - HDFS_LOGLEVEL=WARN
+    networks:
+      - hadoop
+    ports:
+      - "8088:8088" # Web UI for ResourceManager
+
+volumes:
+  namenode_data:
+  datanode_data:
+  datanode_data2:
+  datanode_data3:
+
+networks:
+  hadoop:
+    driver: bridge

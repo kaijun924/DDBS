@@ -1,2 +1,4 @@
 /db-generation
 *.DS_Store
+/database/db-generation
+*.pyc
