@@ -1,4 +1,5 @@
 docker network create --driver bridge mongo_cluster_net
+docker network create --driver bridge hadoop
 
 ## mongo configsvr
 docker-compose -f 1_docker-compose_mongo_configsvr.yml up -d
@@ -44,8 +45,15 @@ docker exec router mongosh setup.js
 #         }]
 #     })
 
+docker-compose -f 4_docker-compose_hadoop.yml up -d
+# wait until healthcheck is "healthy"
+docker exec -it namenode /setup.sh
+## View Hadoop Usage: http://localhost:9870/dfshealth.html#tab-datanode
+
+docker-compose -f 5_docker-compose_redis.yml up -d
+
 ## Monitor
-docker-compose -f 5_docker_compose_monitor.yml up -d
+docker-compose -f 6_docker_compose_monitor.yml up -d
 
 
 ### Cleanup and Reset

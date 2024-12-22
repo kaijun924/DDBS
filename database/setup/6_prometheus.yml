@@ -33,3 +33,11 @@ scrape_configs:
       - source_labels: [__address__]
         target_label: instance
         replacement: 'dbms2'  # Alias for DBMS2
+    
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis_exporter:9121']
+
+  - job_name: 'hadoop'
+    static_configs:
+      - targets: ['hadoop_exporter:9709']

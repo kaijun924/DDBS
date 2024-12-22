@@ -11,6 +11,7 @@ services:
       # - --mongodb.collstats-colls=config.App,config.ApplicationOverride,config.Caller,config.CommonRules,config.HabilitationOverride,config.IconSvg,config.UpdateStatusEntity,config.feature
     networks:
       - mongo_cluster_net
+      - prometheus_net
     ports:
       - "9216:9216" 
     restart: always
@@ -25,6 +26,7 @@ services:
       - --split-cluster
     networks:
       - mongo_cluster_net
+      - prometheus_net
     ports:
       - "9217:9216" 
     restart: always
@@ -38,6 +40,7 @@ services:
       - --split-cluster
     networks:
       - mongo_cluster_net
+      - prometheus_net
     ports:
       - "9218:9216" 
     restart: always
@@ -51,32 +54,71 @@ services:
       - --split-cluster
     networks:
       - mongo_cluster_net
+      - prometheus_net
     ports:
       - "9219:9216" 
     restart: always
+  
+  redis_exporter:
+    image: oliver006/redis_exporter
+    container_name: redis_exporter
+    ports:
+      - "9121:9121"
+    environment:
+      - REDIS_ADDR=redis:6379
+    # depends_on:
+    #   - redis
+    networks:
+      - mongo_cluster_net
+      - prometheus_net
+
+  hadoop_exporter:
+    image: marcelmay/hadoop-hdfs-fsimage-exporter
+    container_name: hadoop_exporter
+    ports:
+      - "9709:9709"
+    volumes:
+      - ./namenode_data:/fsimage-location
+    environment:
+      - JAVA_OPTS=-server -XX:+UseG1GC -Xmx1024m
+    # depends_on:
+    #   - namenode
+    networks:
+      - hadoop_cluster_net
+      - prometheus_net
+
   prometheus:
     image: prom/prometheus:v3.0.1
     container_name: prometheus
     volumes:
-      - ./5_prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./6_prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
-      - mongo_cluster_net
+      - prometheus_net
     ports:
       - "9090:9090"
     restart: always
-
+    
   grafana:
     image: grafana/grafana:11.4.0
     container_name: grafana
     networks:
-      - mongo_cluster_net
+      - prometheus_net
     ports:
       - "3000:3000"
     environment:
-      - GF_SECURITY_ADMIN_USER=admin
-      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      # - GF_SECURITY_ADMIN_USER=admin
+      # - GF_SECURITY_ADMIN_PASSWORD=admin
+    volumes:
+      - ./grafana/provisioning:/etc/grafana/provisioning 
+      - ./grafana/dashboards_template:/var/lib/grafana/dashboards
     restart: always
 
 networks:
   mongo_cluster_net:
     external: true
+  hadoop_cluster_net:
+    external: true
+  prometheus_net:
+    driver: bridge
