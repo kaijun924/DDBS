@@ -94,6 +94,7 @@ sh.addTagRange(
     "DBMS2"
 );
 
+
 // Popular-Rank Table Sharding
 sh.shardCollection("popularRankDatabase.PopularRank", { temporalGranularity: 1 });
 
@@ -118,3 +119,19 @@ sh.addTagRange(
     { temporalGranularity: "monthly\0" },
     "DBMS2"
 );
+
+
+// Enable Monitoring User
+// use admin
+// db.createUser(
+//     {
+//         user: "monitor",
+//         pwd: "monitor",
+//         roles: [{ 
+//             role: "clusterMonitor", 
+//             db: "admin" 
+//         },{ 
+//             role: "read", 
+//             db: "local" 
+//         }]
+//     })

@@ -13,12 +13,13 @@ docker exec configsvr_a mongosh setup.js
 # TEMP：sleep 5
 docker exec dbms1_a mongosh setup.js
 docker exec dbms2_a mongosh setup.js
+# docker exec dbmsX_a mongosh setup.js
 ## check
 # docker exec dbms1_a mongosh --eval "rs.status()"
 
 ## mongo router
 docker-compose -f 3_docker-compose_mongo_router.yml up -d
-sleep 10
+sleep 15
 docker exec router mongosh setup.js
 ## check accessibility
 # docker exec -it router bash
@@ -28,6 +29,23 @@ docker exec router mongosh setup.js
 
 ## debug and dev
 # docker exec -it router mongosh
+
+# use admin
+# db.createUser(
+#     {
+#         user: "monitor",
+#         pwd: "monitor",
+#         roles: [{ 
+#             role: "clusterMonitor", 
+#             db: "admin" 
+#         },{ 
+#             role: "read", 
+#             db: "local" 
+#         }]
+#     })
+
+## Monitor
+docker-compose -f 5_docker_compose_monitor.yml up -d
 
 
 ### Cleanup and Reset

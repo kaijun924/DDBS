@@ -1,18 +1,61 @@
 
 services:
-  mongodb_exporter:
-    image: bitnami/mongodb-exporter:latest
-    container_name: mongodb_exporter
-    environment:
-      - MONGODB_URI=router:27017  # Point to the MongoS router
+  mongodb_exporter_router:
+    image: percona/mongodb_exporter:0.42.0
+    container_name: mongodb_exporter_router
+    command:
+      - --mongodb.uri=mongodb://router:27017
+      - --collect-all
+      - --compatible-mode
+      - --split-cluster
+      # - --mongodb.collstats-colls=config.App,config.ApplicationOverride,config.Caller,config.CommonRules,config.HabilitationOverride,config.IconSvg,config.UpdateStatusEntity,config.feature
     networks:
       - mongo_cluster_net
     ports:
-      - "9216:9216"  # Default port for MongoDB exporter metrics
+      - "9216:9216" 
     restart: always
 
+  mongodb_exporter_configsvr:
+    image: percona/mongodb_exporter:0.42.0
+    container_name: mongodb_exporter_configsvr
+    command:
+      - --mongodb.uri=mongodb://configsvr_a:27017,configsvr_b:27017,configsvr_c:27017
+      - --collect-all
+      - --compatible-mode
+      - --split-cluster
+    networks:
+      - mongo_cluster_net
+    ports:
+      - "9217:9216" 
+    restart: always
+  mongodb_exporter_dbms1:
+    image: percona/mongodb_exporter:0.42.0
+    container_name: mongodb_exporter_dbms1
+    command:
+      - --mongodb.uri=mongodb://dbms1_a:27017,dbms1_b:27017
+      - --collect-all
+      - --compatible-mode
+      - --split-cluster
+    networks:
+      - mongo_cluster_net
+    ports:
+      - "9218:9216" 
+    restart: always
+  mongodb_exporter_dbms2:
+    image: percona/mongodb_exporter:0.42.0
+    container_name: mongodb_exporter_dbms2
+    command:
+      - --mongodb.uri=mongodb://dbms2_a:27017,dbms2_b:27017
+      - --collect-all
+      - --compatible-mode
+      - --split-cluster
+    networks:
+      - mongo_cluster_net
+    ports:
+      - "9219:9216" 
+    restart: always
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v3.0.1
     container_name: prometheus
     volumes:
       - ./5_prometheus.yml:/etc/prometheus/prometheus.yml
@@ -23,7 +66,7 @@ services:
     restart: always
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:11.4.0
     container_name: grafana
     networks:
       - mongo_cluster_net

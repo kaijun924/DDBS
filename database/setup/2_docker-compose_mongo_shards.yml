@@ -2,7 +2,7 @@ services:
   # DBMS1 Replica Set (Shard1)
   dbms1_a:
     container_name: dbms1_a
-    image: mongo
+    image: mongo:6.0.19
     command: mongod --shardsvr --replSet dbms1_rs --port 27017
     volumes:
       - ./2_dbms1.js:/setup.js
@@ -11,7 +11,7 @@ services:
       - mongo_cluster_net
   dbms1_b:
     container_name: dbms1_b
-    image: mongo
+    image: mongo:6.0.19
     command: mongod --shardsvr --replSet dbms1_rs --port 27017
     volumes:
       - ./2_dbms1.js:/setup.js
@@ -22,7 +22,7 @@ services:
   # DBMS2 Replica Set (Shard2)
   dbms2_a:
     container_name: dbms2_a
-    image: mongo
+    image: mongo:6.0.19
     command: mongod --shardsvr --replSet dbms2_rs --port 27017
     volumes:
       - ./2_dbms2.js:/setup.js
@@ -31,7 +31,7 @@ services:
       - mongo_cluster_net
   dbms2_b:
     container_name: dbms2_b
-    image: mongo
+    image: mongo:6.0.19
     command: mongod --shardsvr --replSet dbms2_rs --port 27017
     volumes:
       - ./2_dbms2.js:/setup.js
@@ -42,7 +42,7 @@ services:
   # DBMSX Replica Set (ShardX)
   # dbmsX_a:
   #   container_name: dbmsX_a
-  #   image: mongo
+  #   image: mongo:6.0.19
   #   command: mongod --shardsvr --replSet dbmsX_rs --port 27017
   #   volumes:
   #     - ./2_dbmsX.js:/setup.js
@@ -51,7 +51,7 @@ services:
   #     - mongo_cluster_net
   # dbmsX_b:
   #   container_name: dbmsX_b
-  #   image: mongo
+  #   image: mongo:6.0.19
   #   command: mongod --shardsvr --replSet dbmsX_rs --port 27017
   #   volumes:
   #     - ./2_dbmsX.js:/setup.js

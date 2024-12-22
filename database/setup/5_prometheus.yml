@@ -2,6 +2,34 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'mongodb'
+  - job_name: 'mongodb_router'
     static_configs:
-      - targets: ['mongodb_exporter:9216']
+      - targets: ['mongodb_exporter_router:9216']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'router'  # Alias for router
+
+  - job_name: 'mongodb_configsvr'
+    static_configs:
+      - targets: ['mongodb_exporter_configsvr:9216']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'configsvr'  # Alias for config server
+
+  - job_name: 'mongodb_dbms1'
+    static_configs:
+      - targets: ['mongodb_exporter_dbms1:9216']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'dbms1'  # Alias for DBMS1
+
+  - job_name: 'mongodb_dbms2'
+    static_configs:
+      - targets: ['mongodb_exporter_dbms2:9216']
+    relabel_configs:
+      - source_labels: [__address__]
+        target_label: instance
+        replacement: 'dbms2'  # Alias for DBMS2

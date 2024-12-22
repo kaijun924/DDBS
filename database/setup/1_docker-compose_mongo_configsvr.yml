@@ -1,7 +1,7 @@
 services:
   configsvr_a:
     container_name: configsvr_a
-    image: mongo
+    image: mongo:6.0.19
     command: mongod --configsvr --replSet cfgrs --port 27017
     # ports:
     #   - 40001:27017
@@ -12,7 +12,7 @@ services:
       - mongo_cluster_net
   configsvr_b:
     container_name: configsvr_b
-    image: mongo
+    image: mongo:6.0.19
     command: mongod --configsvr --replSet cfgrs --port 27017
     # ports:
     #   - 40002:27017
@@ -22,7 +22,7 @@ services:
       - mongo_cluster_net
   configsvr_c:
     container_name: configsvr_c
-    image: mongo
+    image: mongo:6.0.19
     command: mongod --configsvr --replSet cfgrs --port 27017
     # ports:
     #   - 40003:27017

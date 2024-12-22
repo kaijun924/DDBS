@@ -1,7 +1,7 @@
 services:
-  mongos:
+  router:
     container_name: router
-    image: mongo
+    image: mongo:6.0.19
     command: mongos --configdb cfgrs/configsvr_a:27017,configsvr_b:27017,configsvr_c:27017 --bind_ip 0.0.0.0 --port 27017
     ports:
       - 60000:27017
