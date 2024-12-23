@@ -134,9 +134,9 @@ class QueryHandeler():
         return self.beReadTableHandler.fetch_beReads(conditions, count, offset)
     
 
-    @cache_with_redis('popularRank')
-    def fetch_popularRank_by_id(self, id: int):
-        result = self.popularRankTableHandler.fetch_popularRanks({"id": id})
+    # @cache_with_redis('popularRank')
+    def fetch_popularRank_by_id(self, condition):
+        result = self.popularRankTableHandler.fetch_popularRanks(condition)
         return result
     
     def fetch_popularRanks(self, conditions={}, count=100, offset=0):
@@ -146,3 +146,7 @@ class QueryHandeler():
     @cache_with_redis('hadoop')
     def fetch_article_content_by_id(self, id: int):
         return self.hadoopHandler.read_file(id)
+    
+    @cache_with_redis('hadoop_list')
+    def fetch_article_content_by_id(self, id: int):
+        return self.hadoopHandler.list_files()
