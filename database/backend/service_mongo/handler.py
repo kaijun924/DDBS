@@ -5,6 +5,7 @@ class MongoDBHandler:
 
     def __init__(self, host: str, port: int):
         """Initialize the MongoDB connection."""
+        self.redis_handler = None
         try:
             self.client = MongoClient(host, port)
             print(f"Connected to MongoDB at {host}:{port}")
@@ -22,3 +23,6 @@ class MongoDBHandler:
     def get_database(self, db_name: str):
         """Retrieve a database."""
         return self.client[db_name]
+    
+    def set_redis_handler(self, redis_handler):
+        self.redis_handler = redis_handler

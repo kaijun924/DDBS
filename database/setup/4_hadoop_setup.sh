@@ -12,3 +12,8 @@ time hdfs dfs -D io.file.buffer.size=524288 -D dfs.blocksize=536870912 -put ./ar
 # Measure time taken for the ls command
 echo "Timing the ls command:"
 time hdfs dfs -ls /articles | wc -l
+
+
+### if in safe mode:
+# hdfs dfsadmin -safemode leave
+# hdfs dfs -rm -r /articles

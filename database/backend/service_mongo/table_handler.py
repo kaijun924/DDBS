@@ -1,16 +1,20 @@
 import json
 from pymongo import MongoClient, errors
-from ..utils.helpers import handle_exceptions, log_execution_time
+from .handler_tools import BeReadTools, ReadTime, DateToTimestamp
+from utils.helpers import handle_exceptions, log_execution_time
 from .handler import MongoDBHandler
-from handler_tools import BeReadTools, ReadTime, DateToTimestamp
 import time
-cache = {}
+from functools import wraps
 
 class TableHandler:
     """Base class for handling common database operations."""    
-    def __init__(self, collection):
+    def __init__(self, collection, cache_handler=None):
         """Initialize with a MongoDB collection."""
         self.collection = collection
+        self.cache_handler = cache_handler
+        
+    def set_cache_handler(self, cache_handler):
+        self.cache_handler = cache_handler
     
     @handle_exceptions
     @log_execution_time
@@ -51,18 +55,54 @@ class TableHandler:
             print(f"Inserted {len(result.inserted_ids)} records into {self.collection.name}")
         except errors.BulkWriteError as e:
             print(f"Error during bulk insert: {e.details}")
-            
+        
+def with_cache(cache_type):
+    """
+    Decorator for handling cache lookup and fallback for database operations.
+
+    Args:
+        cache_type (str): Type of cache (e.g., 'user', 'region').
+    
+    Returns:
+        A decorator function.
+    """
+    def decorator(func):
+        @wraps(func)
+        def wrapper(self: TableHandler, *args, **kwargs):
+            # Skip caching if cache_handler is not set
+            if not hasattr(self, 'cache_handler') or self.cache_handler is None:
+                print("Cache handler is not set. Skipping cache.")
+                return func(self, *args, **kwargs)
+
+            # Construct the cache key
+            cache_key = f"{cache_type}_{args[0]}"  # Assume the first argument is the key
+            cached_result = self.cache_handler.get(cache_type, cache_key)
+
+            # Return cached result if available
+            if cached_result:
+                print(f"Cache hit for {cache_key}")
+                return cached_result
+
+            print(f"Cache miss for {cache_key}, invoking the function")
+            # Fetch result, cache it, and return
+            result = func(self, *args, **kwargs)
+            self.cache_handler.set(cache_type, cache_key, result)
+            return result
+        return wrapper
+    return decorator
+
 class UserTableHandler(TableHandler):
     def __init__(self, db_handler: MongoDBHandler):
-        super().__init__(db_handler.user_collection)
-        
+        super().__init__(db_handler.user_collection, db_handler.redis_handler)
+            
+    
+    @with_cache('user')
+    def fetch_user_by_id(self, uid: str):
+        return self.collection.find_one({"uid": uid}, { "_id": 0, "timestamp": 0, "id": 0 })
+    
     def get_region_by_uid(self, uid):
-        if uid in cache:
-            return cache[uid]
-        else:
-            user = self.collection.find_one({"uid": uid})
-            cache[uid] = user.get("region") if user else None
-        return cache[uid]
+        user = self.fetch_user_by_id
+        return user.get("region")
     
     def fetch_users(self, conditions={}, count=100, offset=0):
         if count == None:
@@ -76,7 +116,7 @@ class UserTableHandler(TableHandler):
 
 class ArticleTableHandler(TableHandler):
     def __init__(self, db_handler: MongoDBHandler):
-        super().__init__(db_handler.article_collection)
+        super().__init__(db_handler.article_collection, db_handler.redis_handler)
 
     def _process_record(self, record):
         if record.get("category") == "science":
@@ -86,6 +126,10 @@ class ArticleTableHandler(TableHandler):
             r2["shardCopy"] = 2
             return [r1, r2]
         return [record]
+    
+    @with_cache('article')
+    def fetch_article_by_id(self, aid: str):
+        return self.collection.find_one({"aid": aid}, { "_id": 0, "timestamp": 0, "id": 0 })
     
     def fetch_articles(self, conditions={}, count=100, offset=0):
         pipeline = [
@@ -129,13 +173,17 @@ class ArticleTableHandler(TableHandler):
     
 class ReadTableHandler(TableHandler):
     def __init__(self, db_handler: MongoDBHandler):
-        super().__init__(db_handler.read_collection)
+        super().__init__(db_handler.read_collection, db_handler.redis_handler)
         self.userTableHandler = UserTableHandler(db_handler)
         
     def _process_record(self, record):
         region = self.userTableHandler.get_region_by_uid(record['uid'])
         record['region'] = region
         return [record]
+
+    @with_cache('read')
+    def fetch_read_by_id(self, rid: str):
+        return self.collection.find_one({"id": rid}, { "_id": 0, "timestamp": 0, "uid": 0, "region": 0 })
 
     def fetch_reads(self, conditions={}, count=100, offset=0):
         ### time check, when feaching beijing user's reads. 
@@ -238,7 +286,7 @@ class ReadTableHandler(TableHandler):
 
 class BeReadTableHandler(TableHandler):
     def __init__(self, db_handler: MongoDBHandler):
-        super().__init__(db_handler.be_read_collection)
+        super().__init__(db_handler.be_read_collection, db_handler.redis_handler)
         # self.userTableHandler = UserTableHandler(db_handler)
         self.readTableHandler = ReadTableHandler(db_handler)
         self.articleTableHandler = ArticleTableHandler(db_handler)
@@ -344,10 +392,10 @@ id, timestamp, temporalGranularity, articleAidList
 """
 class PopularRankTableHandler(TableHandler):
     def __init__(self, db_handler: MongoDBHandler):
-        super().__init__(db_handler.popular_rank_collection)
+        super().__init__(db_handler.popular_rank_collection, db_handler.redis_handler)
         self.readTableHandler = ReadTableHandler(db_handler)
 
-    def bulk_insert(self, batch_size = 5000):
+    def bulk_insert_popularRank(self, batch_size = 5000):
         #获取read表的所有数据
         reads = self.readTableHandler.fetch_read_for_popular_rank({}, None, None)
 

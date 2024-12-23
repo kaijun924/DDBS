@@ -1,9 +1,12 @@
 docker network create --driver bridge mongo_cluster_net
-docker network create --driver bridge hadoop
+docker network create --driver bridge hadoop_cluster_net
+docker network create --driver bridge redis_net
 
 ## mongo configsvr
 docker-compose -f 1_docker-compose_mongo_configsvr.yml up -d
 docker-compose -f 2_docker-compose_mongo_shards.yml up -d # TEMP：
+docker-compose -f 4_docker-compose_hadoop.yml up -d # TEMP：
+docker-compose -f 5_docker-compose_redis.yml up -d # TEMP：
 sleep 5
 docker exec configsvr_a mongosh setup.js
 ## check 
@@ -45,12 +48,13 @@ docker exec router mongosh setup.js
 #         }]
 #     })
 
-docker-compose -f 4_docker-compose_hadoop.yml up -d
+# TEMP：docker-compose -f 4_docker-compose_hadoop.yml up -d
 # wait until healthcheck is "healthy"
+sleep 10
 docker exec -it namenode /setup.sh
 ## View Hadoop Usage: http://localhost:9870/dfshealth.html#tab-datanode
 
-docker-compose -f 5_docker-compose_redis.yml up -d
+# TEMP：docker-compose -f 5_docker-compose_redis.yml up -d
 
 ## Monitor
 docker-compose -f 6_docker_compose_monitor.yml up -d

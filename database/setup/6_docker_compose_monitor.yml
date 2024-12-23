@@ -69,7 +69,7 @@ services:
     # depends_on:
     #   - redis
     networks:
-      - mongo_cluster_net
+      - redis_net
       - prometheus_net
 
   hadoop_exporter:

@@ -1,4 +1,3 @@
-from base_handler import MongoDBHandler, TableHandler
 """
 id, timestamp, aid, readNum, readUidList, commentNum, commentUidList, 
 agreeNum, agreeUidList, shareNum, shareUidList 
