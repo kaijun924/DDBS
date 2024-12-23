@@ -1,3 +1,4 @@
+from curses import KEY_FIND
 from functools import wraps
 from service_mongo.table_handler import UserTableHandler, ArticleTableHandler, ReadTableHandler, BeReadTableHandler, PopularRankTableHandler
 from service_mongo.handler import MongoDBHandler
@@ -10,7 +11,8 @@ class UnifiedHandler():
         self.redis_handler = RedisHandler(host='localhost', port=6379)
         self.hadoop_handler = HadoopHandler(hdfs_url='http://localhost:9870', hdfs_dir='articles/')
         
-        self.set_redis_handler(self.redis_handler)
+        self.mongo_handler.set_redis_handler(self.redis_handler)
+        self.redis_handler = self.redis_handler
     
     def fetch_data_with_cache(self, cache_type, id, fetch_function, *args, **kwargs):
         """Fetch data with Redis caching."""
@@ -73,13 +75,12 @@ class QueryHandeler():
         ## hadoop
         self.hadoopHandler = unfidedHandler.hadoop_handler
         
-    def bulk_insert(self):
-        self.userTableHandler.bulk_insert("'../../db-generation/user.dat'")
-        self.articleTableHandler.bulk_insert("'../../db-generation/article.dat'")
-        self.readTableHandler.bulk_insert("'../../db-generation/read.dat'")
+    def bulk_insert(self, db_folder = "../../db-generation/"):
+        self.userTableHandler.bulk_insert(f"{db_folder}user.dat")
+        self.articleTableHandler.bulk_insert(f"{db_folder}article.dat")
+        self.readTableHandler.bulk_insert(f"{db_folder}read.dat")
         self.beReadTableHandler.bulk_insert_be_read()
         self.popularRankTableHandler.bulk_insert_popularRank()
-        
     
     @cache_with_redis('user')
     def fetch_user_by_id(self, uid: str):
@@ -132,7 +133,6 @@ class QueryHandeler():
         return self.beReadTableHandler.fetch_beReads(conditions, count, offset)
     
 
-
     @cache_with_redis('popularRank')
     def fetch_popularRank_by_id(self, id: int):
         result = self.popularRankTableHandler.fetch_popularRanks({"id": id})
@@ -145,4 +145,3 @@ class QueryHandeler():
     @cache_with_redis('hadoop')
     def fetch_article_content_by_id(self, id: int):
         return self.hadoop_handler.read_file(id)
-        

@@ -120,5 +120,7 @@ networks:
     external: true
   hadoop_cluster_net:
     external: true
+  redis_net:
+    external: true
   prometheus_net:
     driver: bridge

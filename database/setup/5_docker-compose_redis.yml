@@ -12,11 +12,11 @@ services:
       environment:
          - REDIS_REPLICATION_MODE=master
       networks:
-         - mongo_cluster_net
+         - redis_net
       restart: unless-stopped
 volumes:
   redis_data:
 
 networks:
-  mongo_cluster_net:
+  redis_net:
     external: true
