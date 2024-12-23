@@ -11,7 +11,7 @@ class RedisHandler:
     def connect(self, host: str, port: int):
         """Connect to Redis."""
         connection = redis.Redis(host=host, port=port, db=0)
-        connection.config_set('maxmemory', '100mb')
+        connection.config_set('maxmemory', '1024mb')
         connection.config_set('maxmemory-policy', 'allkeys-lru')
         return connection
 

@@ -10,6 +10,6 @@ if __name__ == "__main__":
     query_handler = QueryHandeler(unified_handler)
     
     
-    db_folder = "/Users/ckh/TsingHua清华/Phd/Sem1/DistributedDatabaseSystems/Assignment/project/code/db-generation/"
-    query_handler.bulk_insert(db_folder)
+    # db_folder = "/Users/ckh/TsingHua清华/Phd/Sem1/DistributedDatabaseSystems/Assignment/project/code/db-generation/"
+    query_handler.bulk_insert()
 

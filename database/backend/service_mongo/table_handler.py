@@ -94,14 +94,25 @@ def with_cache(cache_type):
 class UserTableHandler(TableHandler):
     def __init__(self, db_handler: MongoDBHandler):
         super().__init__(db_handler.user_collection, db_handler.redis_handler)
+        self.no_cache_map = {}
             
     
     @with_cache('user')
     def fetch_user_by_id(self, uid: str):
         return self.collection.find_one({"uid": uid}, { "_id": 0, "timestamp": 0, "id": 0 })
     
+    def get_region_by_uid_no_cache(self, uid):
+        if uid in self.no_cache_map:
+            return self.no_cache_map[uid]
+        user = self.collection.find_one({"uid": uid}, { "_id": 0, "timestamp": 0, "id": 0 })
+        self.no_cache_map[uid] = user.get("region")
+        return user.get("region")
+    
+    def clear_no_cache_map(self):
+        self.no_cache_map = {}
+
     def get_region_by_uid(self, uid):
-        user = self.fetch_user_by_id
+        user = self.fetch_user_by_id(uid)
         return user.get("region")
     
     def fetch_users(self, conditions={}, count=100, offset=0):
@@ -177,9 +188,13 @@ class ReadTableHandler(TableHandler):
         self.userTableHandler = UserTableHandler(db_handler)
         
     def _process_record(self, record):
-        region = self.userTableHandler.get_region_by_uid(record['uid'])
+        ##初始化不要用cache
+        region = self.userTableHandler.get_region_by_uid_no_cache(record['uid'])
         record['region'] = region
         return [record]
+    
+    def clear_no_cache_map(self):
+        self.userTableHandler.clear_no_cache_map()
 
     @with_cache('read')
     def fetch_read_by_id(self, rid: str):
@@ -205,8 +220,8 @@ class ReadTableHandler(TableHandler):
         ### implementation: read with added region field, which is the shard key
         fields = {
                     "_id": 0,
-                    "timestamp": 0,
-                    "region": 0
+                    "timestamp": 0
+                    # "region": 0
                 }
         if count == None:
             reads = self.collection.find(conditions, fields)
@@ -283,6 +298,9 @@ class ReadTableHandler(TableHandler):
             {"$limit": limit},
         ]
         return list(self.collection.aggregate(pipeline))
+    
+    def clear(self):
+        self.collection.delete_many({})
 
 class BeReadTableHandler(TableHandler):
     def __init__(self, db_handler: MongoDBHandler):
@@ -317,9 +335,12 @@ class BeReadTableHandler(TableHandler):
             buffer.append(be_read_entity)
         
         print(f"Finished processing {len(buffer)} records.")
-
-        reads = self.readTableHandler.fetch_reads_to_beread({}, None, None)
         
+        self.readTableHandler.clear()
+        reads = self.readTableHandler.fetch_reads_to_beread({}, None, None)
+        print(f"Processing {len(reads)} records.")
+        exit()
+        # print(self.readTableHandler.fetch_read_by_id("10"))
         count = 0
         for read in reads:
             aid = read["aid"]
@@ -357,7 +378,7 @@ class BeReadTableHandler(TableHandler):
             else:
                 insert_buffer.append(be_read_entity)
 
-        self.collection.insert_many(insert_buffer)
+        # self.collection.insert_many(insert_buffer)
         print(f"Finished processing {count} records.")
 
 

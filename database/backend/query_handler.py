@@ -75,12 +75,13 @@ class QueryHandeler():
         ## hadoop
         self.hadoopHandler = unfidedHandler.hadoop_handler
         
-    def bulk_insert(self, db_folder = "../../db-generation/"):
-        self.userTableHandler.bulk_insert(f"{db_folder}user.dat")
-        self.articleTableHandler.bulk_insert(f"{db_folder}article.dat")
+    def bulk_insert(self, db_folder = "../db-generation/"):
+        # self.userTableHandler.bulk_insert(f"{db_folder}user.dat")
+        # self.articleTableHandler.bulk_insert(f"{db_folder}article.dat")
         self.readTableHandler.bulk_insert(f"{db_folder}read.dat")
-        self.beReadTableHandler.bulk_insert_be_read()
-        self.popularRankTableHandler.bulk_insert_popularRank()
+        self.readTableHandler.clear_no_cache_map()
+        # self.beReadTableHandler.bulk_insert_be_read()
+        # self.popularRankTableHandler.bulk_insert_popularRank()
     
     @cache_with_redis('user')
     def fetch_user_by_id(self, uid: str):
