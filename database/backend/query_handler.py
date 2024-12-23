@@ -134,7 +134,7 @@ class QueryHandeler():
         return self.beReadTableHandler.fetch_beReads(conditions, count, offset)
     
 
-    # @cache_with_redis('popularRank')
+    @cache_with_redis('popularRank')
     def fetch_popularRank_by_id(self, condition):
         result = self.popularRankTableHandler.fetch_popularRanks(condition)
         return result
