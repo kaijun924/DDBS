@@ -174,7 +174,7 @@ class ArticleTableHandler(TableHandler):
     def fetch_article_for_beread(self, conditions={},offset=0):
         fields = {
                     "_id": 0,
-                    "timestamp": 0,
+                    # "timestamp": 0,
                     "title": 0,
                     "abstract": 0,
                     "articleTags": 0,
@@ -385,7 +385,7 @@ class BeReadTableHandler(TableHandler):
             else:
                 insert_buffer.append(be_read_entity)
 
-        # self.collection.insert_many(insert_buffer)
+        self.collection.insert_many(insert_buffer)
         print(f"Finished processing {count} records.")
 
 
@@ -487,6 +487,11 @@ class PopularRankTableHandler(TableHandler):
             },
             {
                 "$replaceRoot": { "newRoot": "$deduplicatedDoc" }
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                }
             }
         ]
         if count != None:

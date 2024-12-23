@@ -73,7 +73,7 @@ async def get_article_content_by_id(id: int):
     try:
         content = query_handler.fetch_article_content_by_id(id)
         return content
-    except Exception as e:
+    except Exception as e:   
         raise HTTPException(status_code=500, detail=str(e))
 
 
