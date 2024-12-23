@@ -3,6 +3,9 @@ from service_mongo.handler import MongoDBHandler
 from service_redis.handler import RedisHandler
 from service_hadoop.handler import HadoopHandler
 from query_handler import UnifiedHandler, QueryHandeler  # Assuming the classes are in query_handler.py
+from io import BytesIO
+from PIL import Image
+from fastapi.responses import FileResponse, StreamingResponse
 
 # Initialize FastAPI
 app = FastAPI()
@@ -65,16 +68,49 @@ async def get_read_by_id(bid: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/hadoop/article/{id}")
+@app.get("/hadoop/article_txt/{id}")
 async def get_article_content_by_id(id: int):
     """
     Fetch article content by ID from Hadoop.
     """
     try:
-        content = query_handler.fetch_article_content_by_id(id)
-        return content
+        contents = query_handler.fetch_article_content_by_id(id)
+        for key in contents.keys():
+            if key.endswith('.txt'):
+                return contents[key].decode()
     except Exception as e:   
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/hadoop/article_img_num/{id}")
+async def get_article_content_by_id(id: int):
+    try:
+        contents = query_handler.fetch_article_content_by_id(id)
+        num = 0
+        for key in contents.keys():
+            if key.endswith('.jpg'):
+                num += 1
+        return {"total_images": num}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/hadoop/article_img/{id}_{nth}")
+async def get_article_content_by_id(id: int, nth: int):
+    """
+    Fetch article content by ID from Hadoop.
+    """
+    try:
+        contents = query_handler.fetch_article_content_by_id(id)
+        num = 0
+        for key in contents.keys():
+            if key.endswith('.jpg'):
+                new_val = key.replace('.jpg', '')
+                _,_,val = new_val.split('_')
+                if int(val) == nth:
+                    return StreamingResponse(content=BytesIO(contents[key]), media_type="image/jpeg")            
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
 
 
 @app.get("/popular-rank/{id}")

@@ -21,7 +21,7 @@ class HadoopHandler:
         contents = self.hdfs_client.list(self.hdfs_dir)
         return contents
     
-    def read_file(self,article_id,video_path="temp_result"):
+    def read_file(self,article_id,video_path="../temp_result"):
         article = f'article{article_id}'
         try:
             list_in_article = self.hdfs_client.list(self.hdfs_dir + article)

@@ -145,4 +145,4 @@ class QueryHandeler():
         
     @cache_with_redis('hadoop')
     def fetch_article_content_by_id(self, id: int):
-        return self.hadoop_handler.read_file(id)
+        return self.hadoopHandler.read_file(id)
