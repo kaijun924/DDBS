@@ -1,0 +1,58 @@
+/* Container styles */
+.user-details-container {
+  width: 80%;
+  margin: auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+  background-color: #f9f9f9;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+/* Section headings */
+h1, h2 {
+  text-align: center;
+  color: #333;
+}
+
+/* User info */
+.user-info {
+  margin-bottom: 20px;
+  padding: 10px;
+  background-color: #ffffff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.user-info p {
+  margin: 5px 0;
+  font-size: 16px;
+  color: #555;
+}
+
+/* Table styles */
+.reads-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 20px;
+}
+
+.reads-table th, .reads-table td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: center;
+}
+
+.reads-table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+  color: #555;
+}
+
+.reads-table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.reads-table tr:hover {
+  background-color: #f1f1f1;
+}

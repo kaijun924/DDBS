@@ -1,27 +1,35 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
-import "./UserList.css"; // Import CSS styles
+import { Container, Table } from "react-bootstrap";
+import "./UserList.css"; // Import the CSS file
 
 function UserList() {
   const [users, setUsers] = useState([]);
+  const [selectedUser, setSelectedUser] = useState(null);
 
   // Fetch user data from API
   useEffect(() => {
     axios
-      .get("http://localhost:8000/users")
+      .get("http://localhost:8000/users") // Replace with your actual API endpoint
       .then((response) => {
-        setUsers(response.data);
+        setUsers(response.data); // Store the fetched user data in state
       })
       .catch((error) => {
         console.error("Error fetching user data:", error);
       });
   }, []);
 
+  // Handle row click
+  const handleRowClick = (user) => {
+    setSelectedUser(user.uid); // Set the selected row by user ID
+    console.log("Selected User:", user); // Optional: log the selected user
+  };
+
   return (
-    <div>
-      <h1>User List</h1>
-      <table border="1" style={{ width: "100%", textAlign: "left", borderCollapse: "collapse" }}>
+    <Container className="mt-4">
+      <h1 className="mb-4">User List</h1>
+      <Table striped bordered hover responsive>
         <thead>
           <tr>
             <th>UID</th>
@@ -40,9 +48,9 @@ function UserList() {
         </thead>
         <tbody>
           {users.map((user) => (
-            <tr key={user.uid} className="table-row">
+            <tr key={user.uid}>
               <td>
-                <Link to={`/user/${user.uid}`} style={{ textDecoration: "none", color: "blue" }}>
+                <Link to={`/user/${user.uid}`} className="text-primary text-decoration-none">
                   {user.uid}
                 </Link>
               </td>
@@ -60,8 +68,8 @@ function UserList() {
             </tr>
           ))}
         </tbody>
-      </table>
-    </div>
+      </Table>
+    </Container>
   );
 }
 

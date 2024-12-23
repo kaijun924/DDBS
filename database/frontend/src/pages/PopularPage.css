@@ -1,0 +1,63 @@
+.popular-page-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.panel {
+  flex: 1;
+  height: 80vh; /* Adjust height as needed */
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  background-color: #fff;
+  padding: 10px;
+}
+
+.panel h2 {
+  position: sticky;
+  top: 0;
+  background-color: #fff;
+  padding: 10px 0;
+  z-index: 1;
+  font-size: 1.5em;
+  text-align: center;
+  border-bottom: 1px solid #ddd;
+}
+
+.popular-entry {
+  margin-bottom: 15px;
+}
+
+.popular-entry ul {
+  margin-top: 10px;
+}
+
+.popular-entry li {
+  cursor: pointer;
+  padding: 5px;
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  margin-bottom: 5px;
+  transition: background-color 0.3s ease;
+}
+
+.popular-entry li:hover {
+  background-color: #e8f4ff;
+}
+
+.show-more-button {
+  display: block;
+  margin: 10px auto;
+  padding: 5px 10px;
+  font-size: 14px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.show-more-button:hover {
+  background-color: #0056b3;
+}
