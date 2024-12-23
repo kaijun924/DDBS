@@ -606,30 +606,33 @@ class PopularRankTableHandler(TableHandler):
         self.collection.insert_many(buffer)
 
     def fetch_popularRanks(self, conditions={}, count=100, offset=0):
-        pipeline = [
-            {
-                "$match": conditions
-            },
-            {
-                "$group": {
-                    "_id": "$temporalGranularity",  # Group by the unique identifier
-                    "deduplicatedDoc": { "$first": "$$ROOT" }
-                }
-            },
-            {
-                "$replaceRoot": { "newRoot": "$deduplicatedDoc" }
-            },
-            {
-                "$project": {
-                    "_id": 0,
-                }
-            }
-        ]
-        if count != None:
-            pipeline.append({"$skip": offset})
-            pipeline.append({"$limit": count})
+        # pipeline = [
+        #     {
+        #         "$match": conditions
+        #     },
+        #     {
+        #         "$group": {
+        #             "temporalGranularity": "$temporalGranularity",  # Group by the unique identifier
+        #         }
+        #     },
+        #     {
+        #         "$replaceRoot": { "newRoot": "$deduplicatedDoc" }
+        #     },
+        #     {
+        #         "$project": {
+        #             "_id": 0,
+        #         }
+        #     }
+        # ]
+        # if count != None:
+        #     pipeline.append({"$skip": offset})
+        #     pipeline.append({"$limit": count})
 
-        popularRanks = self.collection.aggregate(pipeline)
+        # popularRanks = self.collection.aggregate(pipeline)
+        fields = {
+                    "_id": 0
+                }
+        popularRanks = self.collection.find(conditions,fields)
         return list(popularRanks)
 
 

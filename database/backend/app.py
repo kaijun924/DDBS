@@ -109,17 +109,34 @@ async def get_article_content_by_id(id: int, nth: int):
                     return StreamingResponse(content=BytesIO(contents[key]), media_type="image/jpeg")            
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+# @app.get("/hadoop/article_video_query/{id}")
+# async def get_article_content_by_id(id: int):
+#     """
+#     Fetch article content by ID from Hadoop.
+#     """
+#     try:
+#         contents = query_handler.fetch_article_content_by_id(id)
+#         for key in contents.keys():
+#             if key.endswith('.flv'):
+#                 return {"video_path": key}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=str(e))
+
     
 
 
 
-@app.get("/popular-rank/{id}")
-async def get_popular_rank_by_id(id: int):
+@app.post("/popular-rank/{temporalGranularity}")
+async def get_popular_rank_by_id(temporalGranularity: str):
     """
     Fetch popular rank by ID.
     """
     try:
-        rank = query_handler.fetch_popularRank_by_id(id)
+        rank = query_handler.fetch_popularRank_by_id({"temporalGranularity":temporalGranularity})
+        # if rank["_id"]:
+        #     del rank["_id"]
+        # print(rank)
         return rank
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
