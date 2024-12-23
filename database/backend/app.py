@@ -36,15 +36,16 @@ async def get_article_by_id(aid: str):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@app.get("/articles/category")
+@app.post("/articles/category")
 async def get_articles_by_category(
-    category: str = Query(..., description="The category to filter by"),
+    category: str = Query("science", description="The category 'science' or 'technology'"), 
     count: int = Query(100, ge=1, le=1000, description="Number of articles to fetch"),
     offset: int = Query(0, ge=0, description="Offset for pagination")
 ):
     """
     Fetch articles by category with pagination.
     """
+
     try:
         articles = query_handler.fetch_articles_by_category(category, count, offset)
         return articles

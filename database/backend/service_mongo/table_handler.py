@@ -52,7 +52,7 @@ class TableHandler:
         """Write data to the specified collection."""
         try:
             result = self.collection.insert_many(data, ordered=False)
-            print(f"Inserted {len(result.inserted_ids)} records into {self.collection.name}")
+            print(f"\n Inserted {len(result.inserted_ids)} records into {self.collection.name}")
         except errors.BulkWriteError as e:
             print(f"Error during bulk insert: {e.details}")
         
@@ -155,12 +155,19 @@ class ArticleTableHandler(TableHandler):
             },
             {
                 "$replaceRoot": { "newRoot": "$deduplicatedDoc" }
+            }, 
+            {
+                "$project": {
+                    "_id": 0,
+                    "shardCopy": 0,
+                }
             }
         ]
         if count != None:
             pipeline.append({"$skip": offset})
             pipeline.append({"$limit": count})
 
+        print(pipeline)
         articles = self.collection.aggregate(pipeline)
         return list(articles)
     
