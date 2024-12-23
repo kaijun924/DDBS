@@ -6,6 +6,9 @@ from query_handler import UnifiedHandler, QueryHandeler  # Assuming the classes 
 from io import BytesIO
 from PIL import Image
 from fastapi.responses import FileResponse, StreamingResponse
+from fastapi import Response
+from boost import videos
+import os
 
 # Initialize FastAPI
 app = FastAPI()
@@ -69,7 +72,7 @@ async def get_read_by_id(bid: str):
 
 
 @app.get("/hadoop/article_txt/{id}")
-async def get_article_content_by_id(id: int):
+async def get_article_txt(id: int):
     """
     Fetch article content by ID from Hadoop.
     """
@@ -82,7 +85,7 @@ async def get_article_content_by_id(id: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/hadoop/article_img_num/{id}")
-async def get_article_content_by_id(id: int):
+async def get_article_img_num(id: int):
     try:
         contents = query_handler.fetch_article_content_by_id(id)
         num = 0
@@ -94,7 +97,7 @@ async def get_article_content_by_id(id: int):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/hadoop/article_img/{id}_{nth}")
-async def get_article_content_by_id(id: int, nth: int):
+async def get_article_img(id: int, nth: int):
     """
     Fetch article content by ID from Hadoop.
     """
@@ -110,18 +113,68 @@ async def get_article_content_by_id(id: int, nth: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-# @app.get("/hadoop/article_video_query/{id}")
-# async def get_article_content_by_id(id: int):
-#     """
-#     Fetch article content by ID from Hadoop.
-#     """
-#     try:
-#         contents = query_handler.fetch_article_content_by_id(id)
-#         for key in contents.keys():
-#             if key.endswith('.flv'):
-#                 return {"video_path": key}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=str(e))
+@app.get("/hadoop/article_video_query")
+async def get_article_video_list():
+    """
+    Fetch article content by ID from Hadoop.
+    """
+    try:
+        return videos
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/hadoop/article_video/{id}")
+async def get_article_video(id: int):
+    """
+    Fetch article content by ID from Hadoop.
+    """
+    try:
+        contents = query_handler.fetch_article_video(id)
+        for key in videos:
+            new_val = key.replace('.flv', '')
+            _,val,_ = new_val.split('_')
+            val = val.replace("a", "")
+            if int(val) == id:
+                def iterfile():
+                    val = videos[key]
+                    val = val.replace("./", "")
+                    with open(f"../temp_result/{videos[key]}", "rb") as f:
+                        yield from f
+                video_name = videos[key]
+                video_name = video_name.replace("./", "")
+                file_name = f"../temp_result/{video_name}"
+                file_size = os.path.getsize(file_name)
+                file_like = open(file_name, mode="rb")
+                headers = {
+                    "Accept-Ranges": "bytes",
+                    "Content-Length": f"{file_size}",
+                    "Content-Type": "video/flv",
+                    "Content-Disposition": f"attachment;file_name={video_name}"
+                }
+                return StreamingResponse(file_like, headers=headers)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/hadoop/article_video_try/{id}")
+async def main(id: int):
+    contents = query_handler.fetch_article_video(id)
+    video_path = "../temp_result"
+    for key in videos:
+        new_val = key.replace('.flv', '')
+        _,val,_ = new_val.split('_')
+        val = val.replace("a", "")
+        if int(val) == id:
+            video_name = videos[key]
+            file_name = f"{video_path}/{video_name}"
+            file_size = os.path.getsize(file_name)
+            file_like = open(file_name, mode="rb")
+            headers = {
+                "Accept-Ranges": "bytes",
+                "Content-Length": f"{file_size}",
+                "Content-Type": "video/flv",
+                "Content-Disposition": f"attachment;file_name={video_name}"
+            }
+            return StreamingResponse(file_like, headers=headers)
 
     
 

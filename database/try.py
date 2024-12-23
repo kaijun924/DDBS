@@ -18,7 +18,7 @@ db_handler = MongoDBHandler(host, port)
 q = QueryHandeler(db_handler)
 
 #初始化
-q.readTableHandler.bulk_insert("./db-generation/read.dat")
+# q.readTableHandler.bulk_insert("./db-generation/read.dat")
 # q.userTableHandler.bulk_insert("./db-generation/user.dat")
 # q.articleTableHandler.bulk_insert("./db-generation/article.dat")
 # q.beReadTableHandler.bulk_insert_be_read()
@@ -37,7 +37,7 @@ redis
 # print(q.fetch_article_by_id("203"))
 # print(q.fetch_reads_by_id("10"))
 # print(q.fetch_beRead_by_id("10"))
-# print(q.fetch_popularRank_by_id(10))
+print(q.fetch_popularRank_by_id(10))
 
 
 """

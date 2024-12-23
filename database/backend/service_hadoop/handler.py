@@ -21,6 +21,11 @@ class HadoopHandler:
         contents = self.hdfs_client.list(self.hdfs_dir)
         return contents
     
+    def list_files_in_article(self, article_id):
+        article = f'article{article_id}'
+        contents = self.hdfs_client.list(self.hdfs_dir + article)
+        return contents
+    
     def read_file(self,article_id,video_path="../temp_result"):
         article = f'article{article_id}'
         try:
@@ -29,11 +34,25 @@ class HadoopHandler:
             contents = {}
             for file in list_in_article:
                 if file.endswith('.flv'):
-                    self.hdfs_client.download(self.hdfs_dir + article + '/' + file, f'./{video_path}/{file}')
+                    # self.hdfs_client.download(self.hdfs_dir + article + '/' + file, f'./{video_path}/{file}')
                     contents[file] = f'./{video_path}/{file}'
                 else:
                     with self.hdfs_client.read(self.hdfs_dir + article + '/' + file) as reader:
                         contents[file] = reader.read()
+            return contents
+        except hdfs.HdfsError as e:
+            print(e)
+    
+    def read_file_save_video(self, article_id, video_path="../temp_result"):
+        article = f'article{article_id}'
+        try:
+            list_in_article = self.hdfs_client.list(self.hdfs_dir + article)
+            print(f'Contents of {self.hdfs_dir + article}: {list_in_article}')
+            contents = {}
+            for file in list_in_article:
+                if file.endswith('.flv'):
+                    self.hdfs_client.download(self.hdfs_dir + article + '/' + file, f'./{video_path}/{file}')
+                    # contents[file] = f'./{video_path}/{file}'
             return contents
         except hdfs.HdfsError as e:
             print(e)

@@ -143,10 +143,10 @@ class QueryHandeler():
         return self.popularRankTableHandler.fetch_popularRanks(conditions, count, offset)
     
         
-    @cache_with_redis('hadoop')
+    # @cache_with_redis('hadoop')
     def fetch_article_content_by_id(self, id: int):
         return self.hadoopHandler.read_file(id)
     
     @cache_with_redis('hadoop_list')
-    def fetch_article_content_by_id(self, id: int):
-        return self.hadoopHandler.list_files()
+    def fetch_article_video(self, id: int):
+        return self.hadoopHandler.read_file_save_video(id)
