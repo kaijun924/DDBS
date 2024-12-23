@@ -52,7 +52,7 @@ class TableHandler:
         """Write data to the specified collection."""
         try:
             result = self.collection.insert_many(data, ordered=False)
-            print(f"\n Inserted {len(result.inserted_ids)} records into {self.collection.name}")
+            print(f"\t Inserted {len(result.inserted_ids)} records into {self.collection.name}")
         except errors.BulkWriteError as e:
             print(f"Error during bulk insert: {e.details}")
         
@@ -166,10 +166,9 @@ class ArticleTableHandler(TableHandler):
         if count != None:
             pipeline.append({"$skip": offset})
             pipeline.append({"$limit": count})
-
-        print(pipeline)
-        articles = self.collection.aggregate(pipeline)
-        return list(articles)
+            
+        articles = list(self.collection.aggregate(pipeline))
+        return articles
     
     def fetch_article_for_beread(self, conditions={},offset=0):
         fields = {
@@ -198,6 +197,7 @@ class ReadTableHandler(TableHandler):
         ##初始化不要用cache
         region = self.userTableHandler.get_region_by_uid_no_cache(record['uid'])
         record['region'] = region
+        record['rid'] = record['id'].replace("r", "")
         return [record]
     
     def clear_no_cache_map(self):
@@ -205,7 +205,8 @@ class ReadTableHandler(TableHandler):
 
     @with_cache('read')
     def fetch_read_by_id(self, rid: str):
-        return self.collection.find_one({"id": rid}, { "_id": 0, "timestamp": 0, "uid": 0, "region": 0 })
+        result = self.collection.find_one({"rid": rid}, { "_id": 0, "timestamp": 0, "uid": 0, "region": 0 })
+        return result 
 
     def fetch_reads(self, conditions={}, count=100, offset=0):
         ### time check, when feaching beijing user's reads. 
@@ -213,7 +214,6 @@ class ReadTableHandler(TableHandler):
         fields = {
                     "_id": 0,
                     "timestamp": 0,
-                    "uid": 0,
                     "region": 0
                 }
         if count == None:
@@ -254,8 +254,82 @@ class ReadTableHandler(TableHandler):
             reads = self.collection.find(conditions, fields).skip(offset).limit(count)
         return list(reads)
     
+    @with_cache('read_by_user')
     def fetch_reads_by_user(self, uid: int):
         return self.fetch_reads({"uid": uid}, None, None)
+    
+    # @with_cache('read_by_article')
+    def agg_reads_by_article(self):
+        pipeline = [
+            {"$group": {
+                "_id": "$aid",  # Group all matching documents
+                "readNum": {"$sum": 1},  # Total count of reads
+                "readUidList": {"$addToSet": "$uid"},  # Unique list of UIDs who read
+
+                # Comment aggregations
+                "commentNum": {
+                    "$sum": {"$cond": [{"$eq": ["$commentOrNot", "1"]}, 1, 0]}
+                },
+                "commentUidList": {
+                    "$addToSet": {
+                        "$cond": [{"$eq": ["$commentOrNot", "1"]}, "$uid", None]
+                    }
+                },
+
+                # Agree aggregations
+                "agreeNum": {
+                    "$sum": {"$cond": [{"$eq": ["$agreeOrNot", "1"]}, 1, 0]}
+                },
+                "agreeUidList": {
+                    "$addToSet": {
+                        "$cond": [{"$eq": ["$agreeOrNot", "1"]}, "$uid", None]
+                    }
+                },
+
+                # Share aggregations
+                "shareNum": {
+                    "$sum": {"$cond": [{"$eq": ["$shareOrNot", "1"]}, 1, 0]}
+                },
+                "shareUidList": {
+                    "$addToSet": {
+                        "$cond": [{"$eq": ["$shareOrNot", "1"]}, "$uid", None]
+                    }
+                }
+            }},
+            # Clean up any 'None' values in lists (optional)
+            {"$project": {
+                "readNum": 1,
+                "readUidList": 1,
+                "commentNum": 1,
+                "commentUidList": {
+                    "$filter": {
+                        "input": "$commentUidList",
+                        "as": "uid",
+                        "cond": {"$ne": ["$$uid", None]}
+                    }
+                },
+                "agreeNum": 1,
+                "agreeUidList": {
+                    "$filter": {
+                        "input": "$agreeUidList",
+                        "as": "uid",
+                        "cond": {"$ne": ["$$uid", None]}
+                    }
+                },
+                "shareNum": 1,
+                "shareUidList": {
+                    "$filter": {
+                        "input": "$shareUidList",
+                        "as": "uid",
+                        "cond": {"$ne": ["$$uid", None]}
+                    }
+                }
+            }}
+        ]
+
+        # Execute the pipeline
+        results = list(self.collection.aggregate(pipeline))
+        return results
     
     
     def fetch_aggregated_reads_by_category(self, category: str):
@@ -389,8 +463,65 @@ class BeReadTableHandler(TableHandler):
         print(f"Finished processing {count} records.")
 
 
-
+    @handle_exceptions
+    @log_execution_time
+    def bulk_insert_be_read_2(self, batch_size = 500):
+        articles = self.articleTableHandler.fetch_articles({}, None, None)
+        be_read_agg = self.readTableHandler.agg_reads_by_article()
+        be_read_agg = {br["_id"]: br for br in be_read_agg}
         
+        def article_to_be_read(article):
+            be_read_entity = {}
+            be_read_entity["id"] = "br" + article["aid"]
+            be_read_entity["timestamp"] = article["timestamp"]
+            be_read_entity["category"] = article["category"]
+            be_read_entity["aid"] = article["aid"]
+            
+            if article["aid"] in be_read_agg:
+                br = be_read_agg[article["aid"]]
+                be_read_entity["readNum"] = br["readNum"]
+                be_read_entity["readUidList"] = br["readUidList"]
+                be_read_entity["commentNum"] = br["commentNum"]
+                be_read_entity["commentUidList"] = br["commentUidList"]
+                be_read_entity["agreeNum"] = br["agreeNum"]
+                be_read_entity["agreeUidList"] = br["agreeUidList"]
+                be_read_entity["shareNum"] = br["shareNum"]
+                be_read_entity["shareUidList"] = br["shareUidList"]
+            else:
+                be_read_entity["readNum"] = 0
+                be_read_entity["readUidList"] = []
+                be_read_entity["commentNum"] = 0
+                be_read_entity["commentUidList"] = []
+                be_read_entity["agreeNum"] = 0
+                be_read_entity["agreeUidList"] = []
+                be_read_entity["shareNum"] = 0
+                be_read_entity["shareUidList"] = []
+            
+            return be_read_entity
+        
+        be_read_list = list(map(article_to_be_read, articles))
+        print(f"Found {len(be_read_list)} articles.")
+        
+        
+        count = 0
+        buffer = []
+        for be_read in be_read_list:
+            if be_read.get("category") == "science":
+                r1 = be_read.copy()
+                r2 = be_read.copy()
+                r1["shardCopy"] = 1
+                r2["shardCopy"] = 2
+                buffer.extend([r1, r2])
+            else:
+                buffer.append(be_read)
+            count += 1
+            if len(buffer) >= batch_size:
+                self._write_to_db(buffer)
+                buffer = []
+        if buffer:
+            self._write_to_db(buffer)
+        print(f"Finished processing {count} records.")
+
 
     def fetch_beReads(self, conditions={}, count=100, offset=0):
         pipeline = [
