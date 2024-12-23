@@ -58,6 +58,7 @@ docker exec -it namenode /setup.sh
 
 ## Monitor
 docker-compose -f 6_docker_compose_monitor.yml up -d
+# http://localhost:3000 > opstree-mongodb-dashboard
 
 
 ### Cleanup and Reset
@@ -66,3 +67,17 @@ for file in *docker-compose*.yml; do
 done
 docker volume prune -f
 docker network prune -f
+
+
+docker-compose -f 1_docker-compose_mongo_configsvr.yml down
+docker-compose -f 2_docker-compose_mongo_shards.yml down
+docker-compose -f 3_docker-compose_mongo_router.yml down
+docker volume prune -f
+
+docker-compose -f 1_docker-compose_mongo_configsvr.yml up -d
+docker-compose -f 2_docker-compose_mongo_shards.yml up -d 
+docker-compose -f 3_docker-compose_mongo_router.yml up -d
+docker exec configsvr_a mongosh setup.js
+docker exec dbms1_a mongosh setup.js
+docker exec dbms2_a mongosh setup.js
+docker exec router mongosh setup.js
