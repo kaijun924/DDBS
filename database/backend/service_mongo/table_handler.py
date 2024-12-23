@@ -336,10 +336,10 @@ class BeReadTableHandler(TableHandler):
         
         print(f"Finished processing {len(buffer)} records.")
         
-        self.readTableHandler.clear()
+        # self.readTableHandler.clear()
         reads = self.readTableHandler.fetch_reads_to_beread({}, None, None)
-        print(f"Processing {len(reads)} records.")
-        exit()
+        # print(f"Processing {len(reads)} records.")
+        # exit()
         # print(self.readTableHandler.fetch_read_by_id("10"))
         count = 0
         for read in reads:
