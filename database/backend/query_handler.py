@@ -76,11 +76,11 @@ class QueryHandeler():
         self.hadoopHandler = unfidedHandler.hadoop_handler
         
     def bulk_insert(self, db_folder = "../db-generation/"):
-        # self.userTableHandler.bulk_insert(f"{db_folder}user.dat")
-        # self.articleTableHandler.bulk_insert(f"{db_folder}article.dat")
-        # self.readTableHandler.bulk_insert(f"{db_folder}read.dat")
-        # self.readTableHandler.clear_no_cache_map()
-        # self.beReadTableHandler.bulk_insert_be_read_2()
+        self.userTableHandler.bulk_insert(f"{db_folder}user.dat")
+        self.articleTableHandler.bulk_insert(f"{db_folder}article.dat")
+        self.readTableHandler.bulk_insert(f"{db_folder}read.dat")
+        self.readTableHandler.clear_no_cache_map()
+        self.beReadTableHandler.bulk_insert_be_read_2()
         self.popularRankTableHandler.bulk_insert_popularRank()
     
     @cache_with_redis('user')
@@ -143,10 +143,10 @@ class QueryHandeler():
         return self.popularRankTableHandler.fetch_popularRanks(conditions, count, offset)
     
         
-    @cache_with_redis('hadoop')
+    # @cache_with_redis('hadoop')
     def fetch_article_content_by_id(self, id: int):
         return self.hadoopHandler.read_file(id)
     
-    @cache_with_redis('hadoop_list')
-    def fetch_article_content_by_id(self, id: int):
-        return self.hadoopHandler.list_files()
+    # # @cache_with_redis('hadoop_list')
+    # def fetch_article_content_by_id(self, id: int):
+    #     return self.hadoopHandler.list_files()

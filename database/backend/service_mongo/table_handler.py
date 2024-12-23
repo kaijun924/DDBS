@@ -564,7 +564,7 @@ class PopularRankTableHandler(TableHandler):
             aid = read['aid']
             t = ReadTime(read['timestamp'])
             count += 1
-            if count % 5000 == 0:
+            if count % batch_size == 0:
                 print(f"Processing {count} records.")
             for temporalGranularity in time_reads.keys():
                 tg = temporalGranularity

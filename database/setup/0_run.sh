@@ -76,8 +76,8 @@ docker volume prune -f
 
 docker-compose -f 1_docker-compose_mongo_configsvr.yml up -d
 docker-compose -f 2_docker-compose_mongo_shards.yml up -d 
-docker-compose -f 3_docker-compose_mongo_router.yml up -d
 docker exec configsvr_a mongosh setup.js
 docker exec dbms1_a mongosh setup.js
 docker exec dbms2_a mongosh setup.js
+docker-compose -f 3_docker-compose_mongo_router.yml up -d
 docker exec router mongosh setup.js
