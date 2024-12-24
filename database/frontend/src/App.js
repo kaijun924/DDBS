@@ -5,23 +5,22 @@ import UserDetails from "./pages/UserDetails";
 import ArticleList from "./pages/ArticleList";
 import ArticleDetails from "./pages/ArticleDetails";
 import PopularPage from "./pages/PopularPage";
-import ReadLog from "./pages/ReadLog";
 import Footer from "./components/Footer";
+import NavBar from "./components/NavBar";
 
 function App() {
   return (
     <Router>
       <div>
-        {/* Navigation Bar (if needed) */}
+        <NavBar />
         <Routes>
           <Route path="/" element={<UserList />} />
-          <Route path="/user/:id" element={<UserDetails />} />
+          <Route path="/users" element={<UserList />} />
+          <Route path="/user/:uid" element={<UserDetails />} />
           <Route path="/articles" element={<ArticleList />} />
-          <Route path="/article/:id" element={<ArticleDetails />} />
+          <Route path="/article/:aid" element={<ArticleDetails />} />
           <Route path="/popular" element={<PopularPage />} />
-          <Route path="/read-log" element={<ReadLog />} />
         </Routes>
-        {/* Footer */}
         <Footer />
       </div>
     </Router>
