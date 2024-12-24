@@ -830,7 +830,7 @@
           "overrides": []
         },
         "gridPos": {
-          "h": 18,
+          "h": 6,
           "w": 10,
           "x": 0,
           "y": 2
@@ -866,35 +866,9 @@
             "legendFormat": "{{database}}",
             "range": true,
             "refId": "A"
-          },
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus_ds"
-            },
-            "editorMode": "code",
-            "expr": " mongodb_mongod_db_objects_total{env=\"$env\", instance=\"dbms1\"}",
-            "hide": false,
-            "instant": false,
-            "legendFormat": "{{database}}",
-            "range": true,
-            "refId": "B"
-          },
-          {
-            "datasource": {
-              "type": "prometheus",
-              "uid": "prometheus_ds"
-            },
-            "editorMode": "code",
-            "expr": " mongodb_mongod_db_objects_total{env=\"$env\", instance=\"dbms2\"}",
-            "hide": false,
-            "instant": false,
-            "legendFormat": "{{database}}",
-            "range": true,
-            "refId": "C"
           }
         ],
-        "title": "Total Collections/DB",
+        "title": "Router: Total Collections/DB",
         "transformations": [
           {
             "id": "filterFieldsByName",
@@ -1026,6 +1000,95 @@
           "type": "prometheus",
           "uid": "prometheus_ds"
         },
+        "description": "Number of collections in the database.",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "fieldMinMax": false,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 10,
+          "x": 0,
+          "y": 8
+        },
+        "id": 70,
+        "options": {
+          "minVizHeight": 75,
+          "minVizWidth": 75,
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true,
+          "sizing": "auto"
+        },
+        "pluginVersion": "11.4.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus_ds"
+            },
+            "editorMode": "code",
+            "expr": " mongodb_mongod_db_objects_total{env=\"$env\", instance=\"dbms1\"}",
+            "hide": false,
+            "instant": false,
+            "legendFormat": "{{database}}",
+            "range": true,
+            "refId": "B"
+          }
+        ],
+        "title": "DBMS1: Total Collections/DB",
+        "transformations": [
+          {
+            "id": "filterFieldsByName",
+            "options": {
+              "include": {
+                "names": [
+                  "userDatabase",
+                  "articleDatabase",
+                  "beReadDatabase",
+                  "readDatabase",
+                  "popularRankDatabase"
+                ]
+              }
+            }
+          },
+          {
+            "id": "renameByRegex",
+            "options": {
+              "regex": "^(.*)Database$",
+              "renamePattern": "$1"
+            }
+          }
+        ],
+        "type": "gauge"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus_ds"
+        },
         "fieldConfig": {
           "defaults": {
             "color": {
@@ -1121,6 +1184,95 @@
         ],
         "title": "DBMS1: Query Operations",
         "type": "timeseries"
+      },
+      {
+        "datasource": {
+          "type": "prometheus",
+          "uid": "prometheus_ds"
+        },
+        "description": "Number of collections in the database.",
+        "fieldConfig": {
+          "defaults": {
+            "color": {
+              "mode": "thresholds"
+            },
+            "fieldMinMax": false,
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {
+                  "color": "green",
+                  "value": null
+                }
+              ]
+            }
+          },
+          "overrides": []
+        },
+        "gridPos": {
+          "h": 6,
+          "w": 10,
+          "x": 0,
+          "y": 14
+        },
+        "id": 71,
+        "options": {
+          "minVizHeight": 75,
+          "minVizWidth": 75,
+          "orientation": "auto",
+          "reduceOptions": {
+            "calcs": [
+              "lastNotNull"
+            ],
+            "fields": "",
+            "values": false
+          },
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true,
+          "sizing": "auto"
+        },
+        "pluginVersion": "11.4.0",
+        "targets": [
+          {
+            "datasource": {
+              "type": "prometheus",
+              "uid": "prometheus_ds"
+            },
+            "editorMode": "code",
+            "expr": " mongodb_mongod_db_objects_total{env=\"$env\", instance=\"dbms2\"}",
+            "hide": false,
+            "instant": false,
+            "legendFormat": "{{database}}",
+            "range": true,
+            "refId": "C"
+          }
+        ],
+        "title": "DBMS2: Total Collections/DB",
+        "transformations": [
+          {
+            "id": "filterFieldsByName",
+            "options": {
+              "include": {
+                "names": [
+                  "userDatabase",
+                  "articleDatabase",
+                  "beReadDatabase",
+                  "readDatabase",
+                  "popularRankDatabase"
+                ]
+              }
+            }
+          },
+          {
+            "id": "renameByRegex",
+            "options": {
+              "regex": "^(.*)Database$",
+              "renamePattern": "$1"
+            }
+          }
+        ],
+        "type": "gauge"
       },
       {
         "datasource": {
@@ -4240,8 +4392,8 @@
     },
     "timepicker": {},
     "timezone": "",
-    "title": "Opstree/Mongodb Dashboard",
-    "uid": "SsEeTs97k",
+    "title": "Mongodb + Redis",
+    "uid": "SsEeTs17d",
     "version": 1,
     "weekStart": ""
   }

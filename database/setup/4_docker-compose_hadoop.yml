@@ -6,7 +6,7 @@ services:
       - "8020:8020"  # RPC 访问
       - "9870:9870"  # Web UI 访问
     volumes:
-      - namenode_data:/hadoop/dfs/name
+      - ./namenode_data:/hadoop/dfs/name
       # - ../db-generation/articles:/articles
       - /Users/ckh/TsingHua清华/Phd/Sem1/DistributedDatabaseSystems/Assignment/project/code/db-generation/articles:/articles
       - ./4_hadoop_setup.sh:/setup.sh

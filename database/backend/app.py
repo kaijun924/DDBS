@@ -46,7 +46,7 @@ async def get_users():
     Fetch all users.
     """
     try:
-        users = query_handler.fetch_users(count=10)
+        users = query_handler.fetch_users(count=30)
         return users
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
@@ -92,6 +92,31 @@ async def get_read_by_id(bid: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+## get read by uid
+@app.get("/reads_by_user/{uid}")
+async def get_read_by_user(uid: str):
+    """
+    Fetch read information by user ID.
+    """
+    try:
+        read = query_handler.fetch_user_read(uid)
+        return read
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# get beRead by id
+@app.get("/bereads/{brid}")
+async def get_beRead_by_id(brid: str):
+    """
+    Fetch beRead information by ID.
+    """
+    try:
+        beRead = query_handler.fetch_beRead_by_id(brid)
+        return beRead
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 @app.get("/hadoop/article_txt/{id}")
 async def get_article_txt(id: int):

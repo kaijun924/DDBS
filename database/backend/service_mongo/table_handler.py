@@ -117,9 +117,9 @@ class UserTableHandler(TableHandler):
     
     def fetch_users(self, conditions={}, count=100, offset=0):
         if count == None:
-            users = self.collection.find(conditions, { "_id": 0, "timestamp": 0, "id": 0 })
+            users = self.collection.find(conditions, { "_id": 0, "timestamp": 0, "id": 0 }).sort([("timestamp", 1)])
         else:
-            users = self.collection.find(conditions, { "_id": 0, "timestamp": 0, "id": 0 }).skip(offset).limit(count)
+            users = self.collection.find(conditions, { "_id": 0, "timestamp": 0, "id": 0 }).sort([("timestamp", 1)]).skip(offset).limit(count)
         return list(users)
     
     def fetch_users_by_region(self, region: str, count=100, offset=0):
@@ -465,7 +465,7 @@ class BeReadTableHandler(TableHandler):
 
     @handle_exceptions
     @log_execution_time
-    def bulk_insert_be_read_2(self, batch_size = 500):
+    def bulk_insert_be_read_2(self, batch_size = 1000):
         articles = self.articleTableHandler.fetch_articles({}, None, None)
         be_read_agg = self.readTableHandler.agg_reads_by_article()
         be_read_agg = {br["_id"]: br for br in be_read_agg}
@@ -536,6 +536,12 @@ class BeReadTableHandler(TableHandler):
             },
             {
                 "$replaceRoot": { "newRoot": "$deduplicatedDoc" }
+            },
+            {
+                "$project": {
+                    "_id": 0,
+                    # "shardCopy": 0,
+                }
             }
         ]
         if count != None:
@@ -543,7 +549,7 @@ class BeReadTableHandler(TableHandler):
             pipeline.append({"$limit": count})
 
         beread = self.collection.aggregate(pipeline)
-        return list(beread)
+        return list(beread)[0]
 
 
 """

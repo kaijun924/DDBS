@@ -126,7 +126,7 @@ class QueryHandeler():
         }
     
     
-    @cache_with_redis('beRead')
+    # @cache_with_redis('beRead')
     def fetch_beRead_by_id(self, brid: str):
         result = self.beReadTableHandler.fetch_beReads({"id": "br"+brid})
         return result
