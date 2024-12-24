@@ -1,0 +1,15 @@
+/* Highlight row on hover */
+.table-row {
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .table-row:hover {
+    background-color: #f0f8ff; /* Light blue */
+  }
+  
+  /* Style for selected row */
+  .table-row.selected {
+    background-color: #add8e6; /* Highlight selected row */
+  }
+  

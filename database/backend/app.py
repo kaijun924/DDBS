@@ -9,9 +9,19 @@ from fastapi.responses import FileResponse, StreamingResponse
 from fastapi import Response
 from boost import videos
 import os
+from fastapi.middleware.cors import CORSMiddleware
 
 # Initialize FastAPI
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    # allow_origins=["http://localhost:3333"],  # Allow requests from React frontend
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],  # Allow all HTTP methods
+    allow_headers=["*"],  # Allow all headers
+)
 
 # Initialize UnifiedHandler and QueryHandler
 unified_handler = UnifiedHandler()
@@ -26,6 +36,18 @@ async def get_user_by_id(uid: str):
     try:
         user = query_handler.fetch_user_by_id(uid)
         return user
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+## get user list
+@app.get("/users")
+async def get_users():
+    """
+    Fetch all users.
+    """
+    try:
+        users = query_handler.fetch_users(count=10)
+        return users
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -78,6 +100,7 @@ async def get_article_txt(id: int):
     """
     try:
         contents = query_handler.fetch_article_content_by_id(id)
+        print(contents, type(contents))
         for key in contents.keys():
             if key.endswith('.txt'):
                 return contents[key].decode()
