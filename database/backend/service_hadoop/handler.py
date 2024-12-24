@@ -12,7 +12,7 @@ from io import BytesIO
 # print(f'Contents of {hdfs_dir}: {contents}')
 
 class HadoopHandler:
-    def __init__(self, hdfs_url='http://localhost:9870', hdfs_dir='/articles/'):
+    def __init__(self, hdfs_url='http://localhost:9870', hdfs_dir='articles/'):
         self.hdfs_client = InsecureClient(hdfs_url, user='root')
         print(f"Connected to HDFS at {hdfs_url} @ {hdfs_dir}")
         self.hdfs_dir = hdfs_dir

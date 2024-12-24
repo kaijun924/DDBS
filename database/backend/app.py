@@ -161,9 +161,11 @@ async def get_article_video(id: int):
                 def iterfile():
                     val = videos[key]
                     val = val.replace("./", "")
+                    val = val.replace(".flv", ".mp4")
                     with open(f"../temp_result/{videos[key]}", "rb") as f:
                         yield from f
                 video_name = videos[key]
+                video_name = video_name.replace(".flv", ".mp4")
                 video_name = video_name.replace("./", "")
                 file_name = f"../temp_result/{video_name}"
                 file_size = os.path.getsize(file_name)
@@ -171,33 +173,12 @@ async def get_article_video(id: int):
                 headers = {
                     "Accept-Ranges": "bytes",
                     "Content-Length": f"{file_size}",
-                    "Content-Type": "video/flv",
+                    "Content-Type": "video/mp4",
                     "Content-Disposition": f"attachment;file_name={video_name}"
                 }
                 return StreamingResponse(file_like, headers=headers)
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
-
-@app.get("/hadoop/article_video_try/{id}")
-async def main(id: int):
-    contents = query_handler.fetch_article_video(id)
-    video_path = "../temp_result"
-    for key in videos:
-        new_val = key.replace('.flv', '')
-        _,val,_ = new_val.split('_')
-        val = val.replace("a", "")
-        if int(val) == id:
-            video_name = videos[key]
-            file_name = f"{video_path}/{video_name}"
-            file_size = os.path.getsize(file_name)
-            file_like = open(file_name, mode="rb")
-            headers = {
-                "Accept-Ranges": "bytes",
-                "Content-Length": f"{file_size}",
-                "Content-Type": "video/flv",
-                "Content-Disposition": f"attachment;file_name={video_name}"
-            }
-            return StreamingResponse(file_like, headers=headers)
 
     
 

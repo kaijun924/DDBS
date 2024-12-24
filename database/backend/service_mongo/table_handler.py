@@ -554,6 +554,8 @@ class PopularRankTableHandler(TableHandler):
         super().__init__(db_handler.popular_rank_collection, db_handler.redis_handler)
         self.readTableHandler = ReadTableHandler(db_handler)
 
+    @handle_exceptions
+    @log_execution_time
     def bulk_insert_popularRank(self, batch_size = 5000):
         #获取read表的所有数据
         reads = self.readTableHandler.fetch_read_for_popular_rank({}, None, None)

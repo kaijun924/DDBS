@@ -6,7 +6,7 @@ import vlc
 hadoop = Hadoop_handler()
 print(f"total {len(hadoop.list_files())} files in {hadoop.hdfs_dir}")
 # print(f'Contents of {hadoop.hdfs_dir}: {hadoop.list_files()}')
-contents = hadoop.read_file(1010)
+contents = hadoop.read_file(1)
 print(contents.keys())
 for key in contents.keys():
     if key.endswith('.jpg'):

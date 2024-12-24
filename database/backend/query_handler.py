@@ -9,7 +9,7 @@ class UnifiedHandler():
     def __init__(self):
         self.mongo_handler = MongoDBHandler(host='localhost', port=60000)
         self.redis_handler = RedisHandler(host='localhost', port=6379)
-        self.hadoop_handler = HadoopHandler(hdfs_url='http://localhost:9870', hdfs_dir='/articles/')
+        self.hadoop_handler = HadoopHandler(hdfs_url='http://localhost:9870', hdfs_dir='articles/')
         
         self.mongo_handler.set_redis_handler(self.redis_handler)
         self.redis_handler = self.redis_handler
@@ -80,7 +80,8 @@ class QueryHandeler():
         self.articleTableHandler.bulk_insert(f"{db_folder}article.dat")
         self.readTableHandler.bulk_insert(f"{db_folder}read.dat")
         self.readTableHandler.clear_no_cache_map()
-        self.beReadTableHandler.bulk_insert_be_read_2()
+        # self.beReadTableHandler.bulk_insert_be_read_2()
+        self.beReadTableHandler.bulk_insert_be_read()
         self.popularRankTableHandler.bulk_insert_popularRank()
     
     @cache_with_redis('user')
@@ -148,6 +149,6 @@ class QueryHandeler():
     def fetch_article_content_by_id(self, id: int):
         return self.hadoopHandler.read_file(id)
     
-    @cache_with_redis('hadoop_list')
+    # @cache_with_redis('hadoop_list')
     def fetch_article_video(self, id: int):
         return self.hadoopHandler.read_file_save_video(id)

@@ -12,18 +12,18 @@ if __name__ == "__main__":
     query_handler = QueryHandeler(unified_handler)
     
     
-    db_folder = "/Users/ckh/TsingHua清华/Phd/Sem1/DistributedDatabaseSystems/Assignment/project/code/db-generation/"
-    query_handler.bulk_insert(db_folder)
+    # db_folder = "/Users/ckh/TsingHua清华/Phd/Sem1/DistributedDatabaseSystems/Assignment/project/code/db-generation/"
+    # query_handler.bulk_insert()
     
-    # contents = query_handler.fetch_article_content_by_id(1010)
-    # print(contents.keys())
-    # for key in contents.keys():
-    #     if key.endswith('.jpg'):
-    #         img = Image.open(BytesIO(contents[key]))
-    #         img.save(f'./{key}')
-    #         print(f'Image {key} saved')
-    #     elif key.endswith('.txt'):
-    #         print(contents[key].decode())
-    #     else:
-    #         print(contents[key])
+    contents = query_handler.fetch_article_content_by_id(1010)
+    print(contents.keys())
+    for key in contents.keys():
+        if key.endswith('.jpg'):
+            img = Image.open(BytesIO(contents[key]))
+            img.save(f'./{key}')
+            print(f'Image {key} saved')
+        elif key.endswith('.txt'):
+            print(contents[key].decode())
+        else:
+            print(contents[key])
 
