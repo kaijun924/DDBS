@@ -209,8 +209,8 @@ class ReadTableHandler(TableHandler):
         return result 
 
     def fetch_reads(self, conditions={}, count=100, offset=0):
-        ### time check, when feaching beijing user's reads. 
         ### implementation: read with added region field, which is the shard key
+        ### time check, when feaching beijing user's reads. 
         fields = {
                     "_id": 0,
                     "timestamp": 0,
@@ -513,6 +513,7 @@ class BeReadTableHandler(TableHandler):
                 r2["shardCopy"] = 2
                 buffer.extend([r1, r2])
             else:
+                be_read["shardCopy"] = 2
                 buffer.append(be_read)
             count += 1
             if len(buffer) >= batch_size:

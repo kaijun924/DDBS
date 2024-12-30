@@ -128,7 +128,7 @@ async def get_article_txt(id: int):
         print(contents, type(contents))
         for key in contents.keys():
             if key.endswith('.txt'):
-                return contents[key].decode()
+                return {"text":contents[key].decode()}
     except Exception as e:   
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -189,6 +189,7 @@ async def get_article_video(id: int):
                     val = val.replace(".flv", ".mp4")
                     with open(f"../temp_result/{videos[key]}", "rb") as f:
                         yield from f
+                # video_name = "video_a9_video.flv"
                 video_name = videos[key]
                 video_name = video_name.replace(".flv", ".mp4")
                 video_name = video_name.replace("./", "")

@@ -3,6 +3,7 @@ from PIL import Image
 import hdfs
 import os
 from io import BytesIO
+import subprocess
 
 # # 连接到 HDFS
 # hdfs_client = InsecureClient('http://localhost:9870', user='root')  # NameNode Web UI 地址
@@ -52,6 +53,10 @@ class HadoopHandler:
             for file in list_in_article:
                 if file.endswith('.flv'):
                     self.hdfs_client.download(self.hdfs_dir + article + '/' + file, f'./{video_path}/{file}')
+                    #然后把flv转换成mp4
+                    flv_file = f'./{video_path}/{file}'
+                    mp4_file = flv_file.replace('.flv', '.mp4')
+                    subprocess.run(['ffmpeg', '-i', flv_file, mp4_file])
                     # contents[file] = f'./{video_path}/{file}'
             return contents
         except hdfs.HdfsError as e:

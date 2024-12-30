@@ -1,18 +1,18 @@
 services:
-  namenode_demo:
+  namenode:
     image: bde2020/hadoop-namenode:2.0.0-hadoop3.2.1-java8
-    container_name: namenode_demo
+    container_name: namenode
     ports:
       - "8020:8020"  # RPC 访问
       - "9870:9870"  # Web UI 访问
     volumes:
-      - ./namenode_data:/hadoop/dfs/name
+      - namenode_data:/hadoop/dfs/name
       - ../db-generation/articles:/articles
       # - /Users/ckh/TsingHua清华/Phd/Sem1/DistributedDatabaseSystems/Assignment/project/code/db-generation/articles:/articles
-      - ./4_hadoop_setup.sh:/setup.sh
+      - ./hello.sh:/loading.sh
     environment:
       - CLUSTER_NAME=hadoop-cluster
-      - CORE_CONF_fs_defaultFS=hdfs://namenode_demo:8020
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
       - HDFS_CONF_dfs_replication=2
       - HDFS_CONF_dfs_client_use_datanode_hostname=true
       - HDFS_CONF_dfs_encrypt_data_transfer=false
@@ -26,53 +26,53 @@ services:
     networks:
       - hadoop_cluster_net
 
-  datanode1_demo:
+  datanode1:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: datanode1_demo
+    container_name: datanode1
     ports:
       - 9864:9864 # DataNode1 Web UI
     volumes:
       - datanode1_data:/hadoop/dfs/data
     environment:
-      - CORE_CONF_fs_defaultFS=hdfs://namenode_demo:8020
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
       - HDFS_CONF_dfs_client_use_datanode_hostname=true
       - HDFS_CONF_dfs_encrypt_data_transfer=false
       - HDFS_CONF_dfs_data_transfer_protection=
     depends_on:
-      - namenode_demo
+      - namenode
     networks:
       - hadoop_cluster_net
 
-  datanode2_demo:
+  datanode2:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: datanode2_demo
+    container_name: datanode2
     ports:
       - 9865:9864 # DataNode1 Web UI
     volumes:
       - datanode2_data:/hadoop/dfs/data
     environment:
-      - CORE_CONF_fs_defaultFS=hdfs://namenode_demo:8020
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
       - HDFS_CONF_dfs_client_use_datanode_hostname=true
       - HDFS_CONF_dfs_encrypt_data_transfer=false
       - HDFS_CONF_dfs_data_transfer_protection=
     depends_on:
-      - namenode_demo
+      - namenode
     networks:
       - hadoop_cluster_net
-  datanode3_demo:
+  datanode3:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: datanode3_demo
+    container_name: datanode3
     volumes:
       - datanode3_data:/hadoop/dfs/data
     environment:
-      - CORE_CONF_fs_defaultFS=hdfs://namenode_demo:8020
+      - CORE_CONF_fs_defaultFS=hdfs://namenode:8020
       - HDFS_CONF_dfs_client_use_datanode_hostname=true
       - HDFS_CONF_dfs_encrypt_data_transfer=false
       - HDFS_CONF_dfs_data_transfer_protection=
     ports:
       - 9866:9864 # DataNode1 Web UI
     depends_on:
-      - namenode_demo
+      - namenode
     networks:
       - hadoop_cluster_net
   # resourcemanager:

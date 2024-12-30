@@ -20,18 +20,26 @@ function ArticleDetails() {
       .then((response) => {
         setArticleData(response.data);
         setLoading((prev) => ({ ...prev, details: false }));
-
+        // console.log(response.data);
         // Fetch text, images, and video based on article details
-        // const { text, image, video } = response.data;
-        // const imageList = image.split(",").filter((img) => img); // Handle multiple images
-        // setArticleImages(imageList);
-
-        // axios.get(`http://localhost:8000/hadoop/article_txt/${text}`).then((res) => {
-        //   setArticleText(res.data.text);
-        // });
-
-        // if (video) setArticleVideo(`http://localhost:8000/hadoop/article_vid/${video}`);
-        // setLoading((prev) => ({ ...prev, content: false }));
+        const { text, image, video } = response.data;
+        var imageList = image.split(",").filter((img) => img); // Handle multiple images
+        imageList.forEach((image, index, array) => {
+          // 对每个图像进行处理，例如替换文件扩展名
+          array[index] = image.replace('.jpg', '').split('_')[1].replace('a', '');
+        });
+        // console.log(imageList);
+        setArticleImages(imageList);
+        axios.get(`http://localhost:8000/hadoop/article_txt/${aid}`).then((res) => {
+          // console.log(res.data.text);
+          setArticleText(res.data.text);
+        });
+        if (video){
+          setArticleVideo(`http://localhost:8000/hadoop/article_video/${aid}`);
+        }
+        setLoading((prev) => ({ ...prev, content: false }));
+      //   if (video) setArticleVideo(`http://localhost:8000/hadoop/article_video/${video}`);
+      //   setLoading((prev) => ({ ...prev, content: false }));
       })
       .catch((err) => console.error("Error fetching article details:", err));
 
@@ -104,8 +112,9 @@ function ArticleDetails() {
                 {articleImages.map((img, index) => (
                   <img
                     key={index}
-                    src={`http://localhost:8000/hadoop/article_img/${img}`}
+                    src={`http://localhost:8000/hadoop/article_img/${img}_${index}`}
                     alt={`article img ${index}`}
+                    style={{ width: '500px', height: '500px' }}
                     className="img-fluid mb-3"
                   />
                 ))}
